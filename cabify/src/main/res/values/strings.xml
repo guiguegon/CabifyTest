@@ -1,0 +1,10 @@
+<resources>
+    <string name="cabify_application_name">CabifyTest</string>
+    <string name="google_map_api_key">AIzaSyAYVB5oy_FbMdMSz84tLogaxSPMtBq0vo4</string>
+    <string name="map_toolbar_title">Map</string>
+    <string name="map_exception_necessary_permissions">Please, allow the app permissions in settings</string>
+
+    <string name="cabify_legend_start">Select a start position in the map or search it</string>
+    <string name="cabify_legend_end">Now select a final position in the map or search it</string>
+    <string name="cabify_legend_see_results">See results</string>
+</resources>
