@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import javax.inject.Inject;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -31,21 +32,14 @@ public class LocationHelper
     private static final int MAX_RESULTS = 5;
     private static final long TWO_MINUTES = 2 * 60 * 1000;
 
-    private static LocationHelper sInstance;
     private FragmentActivity activity;
 
     // Google Api vars
     private GoogleApiClient mGoogleApiClient;
     private LocationHelperListener locationHelperListener;
 
-    private LocationHelper() {
-    }
-
-    public static LocationHelper getInstance() {
-        if (sInstance == null) {
-            sInstance = new LocationHelper();
-        }
-        return sInstance;
+    @Inject
+    public LocationHelper() {
     }
 
     public static boolean isLocationValid(Location location) {
@@ -139,7 +133,7 @@ public class LocationHelper
 
     private void onError(Throwable throwable) {
         if (locationHelperListener != null) {
-            locationHelperListener.onError();
+            locationHelperListener.onLocationError();
         }
     }
 
@@ -204,6 +198,6 @@ public class LocationHelper
     public interface LocationHelperListener {
         void onGotAddress(List<Address> addresses);
 
-        void onError();
+        void onLocationError();
     }
 }

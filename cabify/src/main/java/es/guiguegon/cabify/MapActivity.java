@@ -7,7 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterManager;
 import com.karumi.dexter.Dexter;
 import es.guiguegon.cabify.adapters.AddressAdapter;
+import es.guiguegon.cabify.di.DaggerMapActivityComponent;
 import es.guiguegon.cabify.dialogs.EstimatesDialogFragment;
 import es.guiguegon.cabify.helpers.GoogleMapHelper;
 import es.guiguegon.cabify.helpers.LocationHelper;
@@ -40,10 +41,12 @@ import es.guiguegon.cabify.models.Stop;
 import es.guiguegon.cabify.models.StopBuilder;
 import es.guiguegon.cabify.net.CabifyApi;
 import es.guiguegon.cabify.net.requests.EstimateRequest;
+import es.guiguegon.cabify.utils.AnimationListener;
 import es.guiguegon.cabify.utils.LocationUtils;
 import es.guiguegon.cabify.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -52,14 +55,18 @@ import rx.schedulers.Schedulers;
 /**
  * Created by guiguegon on 09/09/16.
  */
+
 public class MapActivity extends AppCompatActivity
         implements GoogleMap.OnMapLoadedCallback, LocationListener,
         LocationHelper.LocationHelperListener, AddressAdapter.AddressAdapterListener,
         GoogleMap.OnMapClickListener, ClusterManager.OnClusterItemClickListener<Marker> {
 
     // Dependencies
+    @Inject
     LocationHelper locationHelper;
+    @Inject
     GoogleMapHelper googleMapHelper;
+    @Inject
     CabifyApi cabifyApi;
 
     // Views
@@ -103,9 +110,7 @@ public class MapActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Dexter.initialize(this);
-        googleMapHelper = GoogleMapHelper.getInstance();
-        locationHelper = LocationHelper.getInstance();
-        cabifyApi = CabifyApi.getInstance();
+        DaggerMapActivityComponent.builder().build().inject(this);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
     }
@@ -115,7 +120,7 @@ public class MapActivity extends AppCompatActivity
         super.onPostCreate(savedInstanceState);
         loadMap();
         setClickListeners();
-        locationResultPanel();
+        initLocationResultPanel();
     }
 
     @Override
@@ -135,24 +140,6 @@ public class MapActivity extends AppCompatActivity
         locationHelper.onStop();
     }
 
-    private void locationResultPanel() {
-        addressAdapter = new AddressAdapter();
-        addressAdapter.setAddressAdapterListener(this);
-        resultsRecycler.setAdapter(addressAdapter);
-        resultsRecycler.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        resultsRecycler.setItemAnimator(new DefaultItemAnimator());
-    }
-
-    public void fillSelectedResult(Address address) {
-        fillSelectedResult(new Marker(address));
-    }
-
-    public void fillSelectedResult(Marker marker) {
-        this.selectedMarker = marker;
-        locationSelectedRawAddress.setText(LocationUtils.getFullAddress(marker));
-    }
-
     private void setClickListeners() {
         myLocationBtn.setOnClickListener(this::onMyLocationBtn);
         submitBtn.setOnClickListener(this::onSubmitBtn);
@@ -164,41 +151,43 @@ public class MapActivity extends AppCompatActivity
         googleMapHelper.setOnMapLoadedListener(this);
     }
 
+    private void initLocationResultPanel() {
+        addressAdapter = new AddressAdapter();
+        addressAdapter.setAddressAdapterListener(this);
+        resultsRecycler.setAdapter(addressAdapter);
+        resultsRecycler.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        resultsRecycler.setItemAnimator(new DefaultItemAnimator());
+    }
+
     // Panels
+    public void fillSelectedResult(Address address) {
+        fillSelectedResult(new Marker(address));
+    }
+
+    public void fillSelectedResult(Marker marker) {
+        this.selectedMarker = marker;
+        locationSelectedRawAddress.setText(LocationUtils.getFullAddress(marker));
+    }
+
     private void queryResultsPanel(boolean queryResultsPanel) {
         //this.queryResultsPanel = queryResultsPanel;
         Animation animation;
         if (queryResultsPanel) {
             animation = AnimationUtils.loadAnimation(this, R.anim.ytranslate_from_100_to_0_in_400);
-            animation.setAnimationListener(new Animation.AnimationListener() {
+            animation.setAnimationListener(new AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                     resultsLayout.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
                 }
             });
             resultsLayout.startAnimation(animation);
         } else {
             animation = AnimationUtils.loadAnimation(this, R.anim.ytranslate_from_0_to_100_in_400);
-            animation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
+            animation.setAnimationListener(new AnimationListener() {
                 @Override
                 public void onAnimationEnd(Animation animation) {
                     resultsLayout.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
                 }
             });
             resultsLayout.startAnimation(animation);
@@ -210,26 +199,18 @@ public class MapActivity extends AppCompatActivity
         Animation animation;
         if (selectedLocationPanel) {
             animation = AnimationUtils.loadAnimation(this, R.anim.ytranslate_from_100_to_0_in_400);
-            animation.setAnimationListener(new Animation.AnimationListener() {
+            animation.setAnimationListener(new AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                     locationSelectedLayout.setVisibility(View.VISIBLE);
                     locationSelectedFAB.animate().alpha(1f).setDuration(400).start();
                     locationSelectedFAB.setVisibility(View.VISIBLE);
                 }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                }
             });
             locationSelectedLayout.startAnimation(animation);
         } else {
             animation = AnimationUtils.loadAnimation(this, R.anim.ytranslate_from_0_to_100_in_400);
-            animation.setAnimationListener(new Animation.AnimationListener() {
+            animation.setAnimationListener(new AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
                     locationSelectedFAB.animate().alpha(0f).setDuration(400).start();
@@ -239,10 +220,6 @@ public class MapActivity extends AppCompatActivity
                 public void onAnimationEnd(Animation animation) {
                     locationSelectedLayout.setVisibility(View.GONE);
                     locationSelectedFAB.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
                 }
             });
         }
@@ -283,7 +260,9 @@ public class MapActivity extends AppCompatActivity
         } else if (selectedMarker != null && stop == null) {
             googleMapHelper.fixMarker(selectedMarker);
             stop = new StopBuilder().setMarker(selectedMarker).createStop();
+            googleMapHelper.clearMarkers();
             getEstimate();
+            cabifyLegendText.setText(R.string.cabify_legend_loading);
         }
     }
 
@@ -309,12 +288,12 @@ public class MapActivity extends AppCompatActivity
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.i("[MapActivity]", "[onError]");
+                        Log.e("[MapActivity]", "[onLocationError]", e);
                         setLoadingComplete();
                         stop = null;
                         start = null;
-                        new AlertDialog.Builder(MapActivity.this).setMessage(
-                                "Something wrong happen, try again").create().show();
+                        showErrorSnackbar(
+                                "Something went wrong while connecting to server, please try again later");
                     }
 
                     @Override
@@ -328,12 +307,16 @@ public class MapActivity extends AppCompatActivity
     }
 
     private void setCabifyTextResults() {
-        cabifyLegendText.setText(R.string.cabify_legend_see_results);
-        cabifyLegendText.setOnClickListener(this::onCabifyLegend);
+        cabifyLegendText.setText(R.string.cabify_legend_start_again);
+        cabifyLegendText.setOnClickListener(this::onStartAgain);
     }
 
-    private void onCabifyLegend(View view) {
-        loadEstimateDialogFragment();
+    private void onStartAgain(View view) {
+        start = null;
+        stop = null;
+        cabifyLegendText.setOnClickListener(null);
+        googleMapHelper.removeFixedMarkers();
+        cabifyLegendText.setText(R.string.cabify_legend_start);
     }
 
     private void setEstimates(List<Estimate> estimates) {
@@ -349,6 +332,8 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onMapLoaded() {
         googleMapHelper.initMyPosition();
+        locationHelper.requestLocationUpdate((ViewGroup) myLocationBtn.getParent(),
+                LocationUtils.createRequestLocationUpdateOnce(), this);
     }
 
     // GoogleMap.OnMapClickListener interface
@@ -390,8 +375,9 @@ public class MapActivity extends AppCompatActivity
     }
 
     @Override
-    public void onError() {
+    public void onLocationError() {
         setLoadingComplete();
+        showErrorSnackbar("We could not locate that address, please try again later");
     }
 
     // AddressAdapterListener interface
@@ -402,5 +388,9 @@ public class MapActivity extends AppCompatActivity
         googleMapHelper.paintMarker(new Marker(address));
         queryResultsPanel(false);
         selectedLocationPanel(true);
+    }
+
+    private void showErrorSnackbar(String message) {
+        Snackbar.make(submitBtn, message, Snackbar.LENGTH_LONG).show();
     }
 }

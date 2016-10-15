@@ -8,6 +8,7 @@ import es.guiguegon.cabify.models.Estimate;
 import es.guiguegon.cabify.net.requests.EstimateRequest;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -21,19 +22,12 @@ import rx.Observable;
 
 public class CabifyApi {
 
-    private static CabifyApi sInstance;
     private String API_URL = "https://test.cabify.com";
     private CabifyService cabifyService;
 
-    private CabifyApi() {
+    @Inject
+    public CabifyApi() {
         initCabify();
-    }
-
-    public static CabifyApi getInstance() {
-        if (sInstance == null) {
-            sInstance = new CabifyApi();
-        }
-        return sInstance;
     }
 
     private void initCabify() {

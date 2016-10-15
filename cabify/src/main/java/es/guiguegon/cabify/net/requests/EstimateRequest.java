@@ -12,7 +12,7 @@ import java.util.List;
 public class EstimateRequest {
 
     private List<Stop> stops;
-    private String startAt = "2016-10-13 22:59";
+    private String startAt;
 
     private EstimateRequest(List<Stop> stops) {
         this.stops = stops;

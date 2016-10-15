@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import es.guiguegon.cabify.R;
 import es.guiguegon.cabify.models.Estimate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,14 +26,14 @@ public class EstimateAdapter extends RecyclerView.Adapter<EstimateAdapter.Estima
         estimates = new ArrayList<>();
     }
 
-    public void addEstimatees(List<Estimate> addresses) {
-        this.estimates.addAll(addresses);
-        notifyDataSetChanged();
+    public void setEstimatees(List<Estimate> estimates) {
+        clear();
+        addEstimatees(estimates);
     }
 
-    public void setEstimatees(List<Estimate> addresses) {
-        clear();
-        this.estimates.addAll(addresses);
+    public void addEstimatees(List<Estimate> estimates) {
+        this.estimates.addAll(estimates);
+        Collections.sort(this.estimates);
         notifyDataSetChanged();
     }
 

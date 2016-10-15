@@ -6,5 +6,6 @@
 
     <string name="cabify_legend_start">Select a start position in the map or search it</string>
     <string name="cabify_legend_end">Now select a final position in the map or search it</string>
-    <string name="cabify_legend_see_results">See results</string>
+    <string name="cabify_legend_loading">Please wait, we are getting the best prices for you</string>
+    <string name="cabify_legend_start_again">Start again</string>
 </resources>

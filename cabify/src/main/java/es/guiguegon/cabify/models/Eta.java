@@ -23,12 +23,12 @@ public class Eta implements Parcelable {
     };
     private int min;
     private int max;
-    private int formatted;
+    private String formatted;
 
     protected Eta(Parcel in) {
         min = in.readInt();
         max = in.readInt();
-        formatted = in.readInt();
+        formatted = in.readString();
     }
 
     public int getMin() {
@@ -39,7 +39,7 @@ public class Eta implements Parcelable {
         return max;
     }
 
-    public int getFormatted() {
+    public String getFormatted() {
         return formatted;
     }
 
@@ -52,6 +52,6 @@ public class Eta implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(min);
         dest.writeInt(max);
-        dest.writeInt(formatted);
+        dest.writeString(formatted);
     }
 }

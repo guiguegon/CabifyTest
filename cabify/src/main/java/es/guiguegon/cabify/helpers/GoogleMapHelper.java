@@ -20,6 +20,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import es.guiguegon.cabify.R;
 import es.guiguegon.cabify.models.Marker;
 import java.util.ArrayList;
+import javax.inject.Inject;
 
 /**
  * Created by guiguegon on 23/10/2015.
@@ -30,7 +31,6 @@ public class GoogleMapHelper implements OnMapReadyCallback, GoogleMap.OnMapLoade
 
     public final static int NORMAL_ZOOM = 14;
 
-    private static GoogleMapHelper sInstance;
     private SupportMapFragment supportMapFragment;
     private FragmentActivity activity;
 
@@ -47,14 +47,8 @@ public class GoogleMapHelper implements OnMapReadyCallback, GoogleMap.OnMapLoade
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<Marker> fixedMarkers = new ArrayList<>();
 
-    private GoogleMapHelper() {
-    }
-
-    public static GoogleMapHelper getInstance() {
-        if (sInstance == null) {
-            sInstance = new GoogleMapHelper();
-        }
-        return sInstance;
+    @Inject
+    public GoogleMapHelper() {
     }
 
     public void onStart(FragmentActivity activity) {

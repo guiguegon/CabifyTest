@@ -2,11 +2,12 @@ package es.guiguegon.cabify.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * Created by Guille on 12/10/2016.
  */
-public class Estimate implements Parcelable {
+public class Estimate implements Parcelable, Comparable<Estimate> {
 
     @SuppressWarnings("unused")
     public static final Parcelable.Creator<Estimate> CREATOR = new Parcelable.Creator<Estimate>() {
@@ -66,5 +67,10 @@ public class Estimate implements Parcelable {
         dest.writeString(priceFormatted);
         dest.writeString(currency);
         dest.writeString(currencySymbol);
+    }
+
+    @Override
+    public int compareTo(@NonNull Estimate another) {
+        return totalPrice > another.getTotalPrice() ? 1 : -1;
     }
 }
